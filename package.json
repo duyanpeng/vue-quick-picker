@@ -2,7 +2,7 @@
   "name": "vue-simple-picker",
   "version": "0.0.1",
   "description": "基于vue的适用于处理复杂展示数据的高度定制化的picker组件",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
