@@ -1,4 +1,6 @@
 # vue-simple-picker
+[![Build Status](https://travis-ci.org/duyanpeng/vue-simple-picker.svg?branch=master)](https://travis-ci.org/duyanpeng/vue-simple-picker)
+
 基于vue的适用于处理复杂数据的高度定制化的移动端picker插件
 
 ## 安装
