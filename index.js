@@ -1,4 +1,4 @@
-import Vue from 'vue'
+
 import VueSimplePicker from './src/VueSimplePicker.vue';
 
 export default (Vue) => {
