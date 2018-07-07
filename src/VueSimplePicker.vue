@@ -1,14 +1,14 @@
 <!-- picker -->
 <template>
-    <div class="vsim-picker">
-        <div class="vsim-picker-content" ref="parent">
-            <ul class="vsim-picker-list" v-for="(list,index) in data" :key="index" @touchstart="onTouchStart($event,index)" @touchmove="onTouchMove($event,index)" @touchend="onTouchEnd($event,index)" :style="{textAlign: list.textAlign || 'center'}">
-                <li class="vsim-picker-item"  v-for="(item,number) in list.values" :key="number">{{list.valueKey ? item[list.valueKey]:item}}</li>
-            </ul>
-        </div>
-        <div class="vsim-picker-line-top"></div>
-        <div class="vsim-picker-line-bottom"></div>
+  <div class="vsim-picker" :style="{fontFamily:defaultStyle.fontFamily || 'inherit',color:defaultStyle.color || '#808080',fontSize:defaultStyle.fontSize || '16px'}">
+    <div class="vsim-picker-content" ref="parent">
+      <ul class="vsim-picker-list" v-for="(list,index) in data" :key="index" @touchstart="onTouchStart($event,index)" @touchmove="onTouchMove($event,index)" @touchend="onTouchEnd($event,index)" :style="{textAlign: list.textAlign || 'center',flex:list.flex || 1}">
+        <li class="vsim-picker-item" v-for="(item,number) in list.values" :key="number">{{list.valueKey ? item[list.valueKey]:item}}</li>
+      </ul>
     </div>
+    <div class="vsim-picker-line-top"></div>
+    <div class="vsim-picker-line-bottom"></div>
+  </div>
 </template>
 
 <script>
@@ -18,8 +18,25 @@ export default {
     data: {
       default: function() {
         return [];
-      }
+      },
+      type:Array
     },
+    // 默认样式
+    defaultStyle: {
+      default: function() {
+        return {
+          fontSize: "16px",
+          fontFamily: "inherit",
+          color: "#808080"
+        };
+      },
+      type:Object
+    },
+    // 是否展示滚轮样式
+    wheelStyle: {
+      default: true,
+      type:Boolean
+    }
   },
   data() {
     return {
@@ -57,32 +74,43 @@ export default {
     // 给选中的picker加active类名
     addClass(order, index, num = 2) {
       this.$nextTick(() => {
-        if (this.$refs.parent.children[order].children[index + 1])
-          this.$refs.parent.children[order].children[index + 1].className =
-            "vsim-picker-item vsim-picker-item-scale9";
+        [...this.$refs.parent.children[order].children].forEach(item => {
+          item.className = "vsim-picker-item";
+        });
+        if (this.wheelStyle) {
+          if (this.$refs.parent.children[order].children[index + 1])
+            this.$refs.parent.children[order].children[index + 1].className =
+              "vsim-picker-item vsim-picker-item-next";
 
-        if (this.$refs.parent.children[order].children[index - 1])
-          this.$refs.parent.children[order].children[index - 1].className =
-            "vsim-picker-item vsim-picker-item-scale9";
+          if (this.$refs.parent.children[order].children[index - 1])
+            this.$refs.parent.children[order].children[index - 1].className =
+              "vsim-picker-item vsim-picker-item-next";
 
-        if (this.$refs.parent.children[order].children[index + 2])
-          this.$refs.parent.children[order].children[index + 2].className =
-            "vsim-picker-item vsim-picker-item-scale8";
+          if (this.$refs.parent.children[order].children[index + 2])
+            this.$refs.parent.children[order].children[index + 2].className =
+              "vsim-picker-item vsim-picker-item-far";
 
-        if (this.$refs.parent.children[order].children[index - 2])
-          this.$refs.parent.children[order].children[index - 2].className =
-            "vsim-picker-item vsim-picker-item-scale8";
+          if (this.$refs.parent.children[order].children[index - 2])
+            this.$refs.parent.children[order].children[index - 2].className =
+              "vsim-picker-item vsim-picker-item-far";
+        }
 
-            this.$refs.parent.children[order].children[index].className =
-        "vsim-picker-item vsim-picker-item-active";
-    
+        this.$refs.parent.children[order].children[index].className =
+          "vsim-picker-item vsim-picker-item-active";
       });
     },
     // 加载picker到默认选项
     pickerInit() {
+      console.log(this.data)
       this.$nextTick(() => {
         [...this.$refs.parent.children].forEach((element, index) => {
-          this.endMove(element, this.data[index].default, 32, 0, index);
+          this.endMove(
+            element,
+            this.data[index].default,
+            2 * parseFloat(this.defaultStyle.fontSize) || 32,
+            0,
+            index
+          );
         });
       });
     },
@@ -129,7 +157,7 @@ export default {
     },
     onTouchEnd(e, order) {
       e.preventDefault();
-      const step = 32;
+      const step = 2 * parseFloat(this.defaultStyle.fontSize) || 32;
       const target = e.target.parentElement;
       const touchY = target.getAttribute("pos-end");
       const moveDistance = touchY - target.getAttribute("pos-start");
@@ -193,13 +221,14 @@ export default {
 <style scoped>
 .vsim-picker {
   position: relative;
-  height: 160px;
+  font-size: 16px;
+  height: 10em;
   overflow: hidden;
 }
 
 .vsim-picker-content {
   display: flex;
-  height: 160px;
+  height: 10em;
   overflow: hidden;
 }
 
@@ -207,7 +236,7 @@ export default {
   position: absolute;
   width: 100%;
   height: 1px;
-  top: 64px;
+  top: 4em;
   left: 0;
   background: #e2e2e2;
   transform: scaleY(0.5);
@@ -217,34 +246,30 @@ export default {
   position: absolute;
   width: 100%;
   height: 1px;
-  top: 96px;
+  top: 6em;
   left: 0;
   background: #e2e2e2;
   transform: scaleY(0.5);
 }
 
 .vsim-picker-list {
-  list-style: none;  
-  margin-top: 64px;
+  margin-top: 4em;
   flex: 1;
-  font-size: 16px;
+  /* font-size: 16px; */
 }
 
 .vsim-picker-item {
   height: 2em;
   line-height: 2em;
-  font-size: 16px;
 }
-.vsim-picker-item-scale9 {
+.vsim-picker-item-next {
   transform: scaleY(0.9);
-  color: #808080;
 }
-.vsim-picker-item-scale8 {
+.vsim-picker-item-far {
   transform: scaleY(0.8);
-  color: #808080;
 }
 .vsim-picker-item-active {
   transform: scaleY(1);
-    color: #474747;
+  color: #474747;
 }
 </style>
