@@ -132,7 +132,24 @@ exports.default = {
     data: {
       default: function _default() {
         return [];
-      }
+      },
+      type: Array
+    },
+    // 默认样式
+    defaultStyle: {
+      default: function _default() {
+        return {
+          fontSize: "16px",
+          fontFamily: "inherit",
+          color: "#808080"
+        };
+      },
+      type: Object
+    },
+    // 是否展示滚轮样式
+    wheelStyle: {
+      default: true,
+      type: Boolean
     }
   },
   data: function data() {
@@ -180,13 +197,18 @@ exports.default = {
       var num = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 2;
 
       this.$nextTick(function () {
-        if (_this2.$refs.parent.children[order].children[index + 1]) _this2.$refs.parent.children[order].children[index + 1].className = "vsim-picker-item vsim-picker-item-scale9";
+        [].concat(_toConsumableArray(_this2.$refs.parent.children[order].children)).forEach(function (item) {
+          item.className = "vsim-picker-item";
+        });
+        if (_this2.wheelStyle) {
+          if (_this2.$refs.parent.children[order].children[index + 1]) _this2.$refs.parent.children[order].children[index + 1].className = "vsim-picker-item vsim-picker-item-next";
 
-        if (_this2.$refs.parent.children[order].children[index - 1]) _this2.$refs.parent.children[order].children[index - 1].className = "vsim-picker-item vsim-picker-item-scale9";
+          if (_this2.$refs.parent.children[order].children[index - 1]) _this2.$refs.parent.children[order].children[index - 1].className = "vsim-picker-item vsim-picker-item-next";
 
-        if (_this2.$refs.parent.children[order].children[index + 2]) _this2.$refs.parent.children[order].children[index + 2].className = "vsim-picker-item vsim-picker-item-scale8";
+          if (_this2.$refs.parent.children[order].children[index + 2]) _this2.$refs.parent.children[order].children[index + 2].className = "vsim-picker-item vsim-picker-item-far";
 
-        if (_this2.$refs.parent.children[order].children[index - 2]) _this2.$refs.parent.children[order].children[index - 2].className = "vsim-picker-item vsim-picker-item-scale8";
+          if (_this2.$refs.parent.children[order].children[index - 2]) _this2.$refs.parent.children[order].children[index - 2].className = "vsim-picker-item vsim-picker-item-far";
+        }
 
         _this2.$refs.parent.children[order].children[index].className = "vsim-picker-item vsim-picker-item-active";
       });
@@ -196,9 +218,10 @@ exports.default = {
     pickerInit: function pickerInit() {
       var _this3 = this;
 
+      console.log(this.data);
       this.$nextTick(function () {
         [].concat(_toConsumableArray(_this3.$refs.parent.children)).forEach(function (element, index) {
-          _this3.endMove(element, _this3.data[index].default, 32, 0, index);
+          _this3.endMove(element, _this3.data[index].default, 2 * parseFloat(_this3.defaultStyle.fontSize) || 32, 0, index);
         });
       });
     },
@@ -244,7 +267,7 @@ exports.default = {
     },
     onTouchEnd: function onTouchEnd(e, order) {
       e.preventDefault();
-      var step = 32;
+      var step = 2 * parseFloat(this.defaultStyle.fontSize) || 32;
       var target = e.target.parentElement;
       var touchY = target.getAttribute("pos-end");
       var moveDistance = touchY - target.getAttribute("pos-start");
@@ -315,7 +338,7 @@ exports.default = {
     
         /* template */
         Object.assign($124d14, (function () {
-          var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"vsim-picker"},[_c('div',{ref:"parent",staticClass:"vsim-picker-content"},_vm._l((_vm.data),function(list,index){return _c('ul',{key:index,staticClass:"vsim-picker-list",style:({textAlign: list.textAlign || 'center'}),on:{"touchstart":function($event){_vm.onTouchStart($event,index)},"touchmove":function($event){_vm.onTouchMove($event,index)},"touchend":function($event){_vm.onTouchEnd($event,index)}}},_vm._l((list.values),function(item,number){return _c('li',{key:number,staticClass:"vsim-picker-item"},[_vm._v(_vm._s(list.valueKey ? item[list.valueKey]:item))])}))})),_vm._v(" "),_c('div',{staticClass:"vsim-picker-line-top"}),_vm._v(" "),_c('div',{staticClass:"vsim-picker-line-bottom"})])}
+          var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"vsim-picker",style:({fontFamily:_vm.defaultStyle.fontFamily || 'inherit',color:_vm.defaultStyle.color || '#808080',fontSize:_vm.defaultStyle.fontSize || '16px'})},[_c('div',{ref:"parent",staticClass:"vsim-picker-content"},_vm._l((_vm.data),function(list,index){return _c('ul',{key:index,staticClass:"vsim-picker-list",style:({textAlign: list.textAlign || 'center',flex:list.flex || 1}),on:{"touchstart":function($event){_vm.onTouchStart($event,index)},"touchmove":function($event){_vm.onTouchMove($event,index)},"touchend":function($event){_vm.onTouchEnd($event,index)}}},_vm._l((list.values),function(item,number){return _c('li',{key:number,staticClass:"vsim-picker-item"},[_vm._v(_vm._s(list.valueKey ? item[list.valueKey]:item))])}))})),_vm._v(" "),_c('div',{staticClass:"vsim-picker-line-top"}),_vm._v(" "),_c('div',{staticClass:"vsim-picker-line-bottom"})])}
 var staticRenderFns = []
 
           return {
