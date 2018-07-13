@@ -150,12 +150,17 @@ exports.default = {
     wheelStyle: {
       default: true,
       type: Boolean
+    },
+    canClick: {
+      default: true,
+      type: Boolean
     }
   },
   data: function data() {
     return {
       timer: "",
-      value: []
+      value: [],
+      lastValue: [] // 记录上一次的value值判断是否触发change事件
     };
   },
 
@@ -181,6 +186,10 @@ exports.default = {
     }
   },
   methods: {
+    movePurpose: function movePurpose(order, index, e) {
+      this.endMove(e, parseInt(index), 2 * parseFloat(this.defaultStyle.fontSize) || 32, 0, order);
+    },
+
     // 通过索引找到对应数据
     computeValue: function computeValue(value) {
       var _this = this;
@@ -197,33 +206,41 @@ exports.default = {
       var num = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 2;
 
       this.$nextTick(function () {
-        [].concat(_toConsumableArray(_this2.$refs.parent.children[order].children)).forEach(function (item) {
-          item.className = "vsim-picker-item";
-        });
-        if (_this2.wheelStyle) {
-          if (_this2.$refs.parent.children[order].children[index + 1]) _this2.$refs.parent.children[order].children[index + 1].className = "vsim-picker-item vsim-picker-item-next";
+        try {
+          if (_this2.wheelStyle) {
+            if (_this2.$refs.parent.children[order].children[index + 1]) _this2.$refs.parent.children[order].children[index + 1].className = "vsim-picker-item vsim-picker-item-next";
 
-          if (_this2.$refs.parent.children[order].children[index - 1]) _this2.$refs.parent.children[order].children[index - 1].className = "vsim-picker-item vsim-picker-item-next";
+            if (_this2.$refs.parent.children[order].children[index - 1]) _this2.$refs.parent.children[order].children[index - 1].className = "vsim-picker-item vsim-picker-item-next";
 
-          if (_this2.$refs.parent.children[order].children[index + 2]) _this2.$refs.parent.children[order].children[index + 2].className = "vsim-picker-item vsim-picker-item-far";
+            if (_this2.$refs.parent.children[order].children[index + 2]) _this2.$refs.parent.children[order].children[index + 2].className = "vsim-picker-item vsim-picker-item-far";
 
-          if (_this2.$refs.parent.children[order].children[index - 2]) _this2.$refs.parent.children[order].children[index - 2].className = "vsim-picker-item vsim-picker-item-far";
+            if (_this2.$refs.parent.children[order].children[index - 2]) _this2.$refs.parent.children[order].children[index - 2].className = "vsim-picker-item vsim-picker-item-far";
+          }
+
+          _this2.$refs.parent.children[order].children[index].className = "vsim-picker-item vsim-picker-item-active";
+        } catch (e) {
+          console.warn(e.message, "vue-simple-picker");
         }
-
-        _this2.$refs.parent.children[order].children[index].className = "vsim-picker-item vsim-picker-item-active";
       });
+    },
+
+    // 设置picker的值
+    setPickerValue: function setPickerValue(index, defaultValue) {
+      this.endMove(this.$refs.parent.children[index], defaultValue, 2 * parseFloat(this.defaultStyle.fontSize) || 32, 0, index);
     },
 
     // 加载picker到默认选项
     pickerInit: function pickerInit() {
       var _this3 = this;
 
-      console.log(this.data);
       this.$nextTick(function () {
         [].concat(_toConsumableArray(_this3.$refs.parent.children)).forEach(function (element, index) {
           _this3.endMove(element, _this3.data[index].default, 2 * parseFloat(_this3.defaultStyle.fontSize) || 32, 0, index);
         });
       });
+    },
+    refresh: function refresh() {
+      this.pickerInit();
     },
 
     // 动画
@@ -235,15 +252,31 @@ exports.default = {
         target.style.transitionDuration = timer + "ms";
       }
     },
+
+    // 触摸开始
     onTouchStart: function onTouchStart(e, index) {
       e.preventDefault();
-      var target = e.target.parentElement;
+      // 确定触摸的对象是li
+      var target = e.target;
+      if (e.target.tagName === "LI") {
+        target = e.target.parentElement;
+      } else {
+        return;
+      }
+      // 清空选中的active样式
+      [].concat(_toConsumableArray(this.$refs.parent.children[index].children)).forEach(function (item) {
+        item.className = "vsim-picker-item";
+      });
       var touch = e.touches[0];
       var touchY = touch.screenY;
       var screenY = touch.screenY;
+      // 记录开始触摸时距屏幕顶端距离
       target.setAttribute("address-start", touchY);
-      var timestamp = new Date().getTime(); // 当前时间戳
+      target.setAttribute("ismove", false); // 是否触发
+      var timestamp = new Date().getTime();
+      // 记录开始触摸时间
       target.setAttribute("start-time", timestamp);
+      // 判断是否是第一次触摸
       if (!target.getAttribute("mov-distance")) {
         // 存储当前位置
         target.setAttribute("pos-start", touchY);
@@ -252,9 +285,16 @@ exports.default = {
       }
       target.style.transitionDuration = "0ms";
     },
+
+    // 手指移动中
     onTouchMove: function onTouchMove(e, index) {
       e.preventDefault();
-      var target = e.target.parentElement;
+      var target = e.target;
+      if (e.target.tagName === "LI") {
+        target = e.target.parentElement;
+      } else {
+        return;
+      }
       var touch = e.touches[0];
 
       var touchY = touch.screenY;
@@ -262,24 +302,48 @@ exports.default = {
       var moveDistance = touchY - target.getAttribute("pos-start");
       target.setAttribute("pos-end", touchY);
       target.setAttribute("address-end", touchY);
+      target.setAttribute("ismove", true); // 是否触发
       // 移动
       this.transformStyle(target, moveDistance);
     },
+
+    // 手指离开
     onTouchEnd: function onTouchEnd(e, order) {
       e.preventDefault();
       var step = 2 * parseFloat(this.defaultStyle.fontSize) || 32;
-      var target = e.target.parentElement;
+      var target = e.target;
+
+      if (e.target.tagName === "LI") {
+        target = e.target.parentElement;
+      } else {
+        return;
+      }
+
       var touchY = target.getAttribute("pos-end");
       var moveDistance = touchY - target.getAttribute("pos-start");
-      var index = Math.abs(Math.round(moveDistance / step)); // 格子数
+
+      // 判断应该移动多少个li
+      var index = Math.abs(Math.round(moveDistance / step));
 
       // 记录移动的距离
-      var absDistance = parseFloat(target.getAttribute("address-start")) - parseFloat(target.getAttribute("address-end"));
+      var absDistance = parseFloat(target.getAttribute("address-start")) - parseFloat(target.getAttribute("address-end") || target.getAttribute("address-start"));
+
       var timestamp = new Date().getTime();
       // 记录间隔时间
       var timespace = timestamp - parseFloat(target.getAttribute("start-time"));
-      var rate = Math.round(absDistance) / timespace; // 变化比值
-      this.timer = rate * this.data[order].values.length / 5;
+      if (this.canClick && (Math.abs(absDistance) <= 15 || target.getAttribute("ismove") == 'false') && timespace <= 90) {
+        this.movePurpose(order, e.target.getAttribute("data-index"), target);
+        return;
+      }
+      // 计算速度 = 距离/时间
+      var rate = absDistance / timespace;
+      // console.log(rate,'rate')
+      this.timer = rate * 6;
+
+      if (Math.abs(this.timer) <= 2) {
+        this.timer = 0;
+      }
+      // 惯性滚动距离及速度
       index = Math.round(index + this.timer);
       var speed = 200;
       if (Math.abs(Math.floor(this.timer)) >= 2) {
@@ -294,6 +358,7 @@ exports.default = {
       if (index < 0) {
         index = 0;
       }
+      // 边界情况
       if (index > this.data[order].values.length - 1) {
         index = this.data[order].values.length - 1;
       }
@@ -325,7 +390,10 @@ exports.default = {
       this.value[order] = index;
       this.addClass(order, index);
       if (this.value.length === this.data.length) {
-        this.$emit("change", this.computeValue(this.value));
+        if (JSON.stringify(this.lastValue) === JSON.stringify(this.value)) {} else {
+          this.$emit("change", this.computeValue(this.value));
+          this.lastValue = JSON.parse(JSON.stringify(this.value));
+        }
       }
     }
   }
@@ -338,7 +406,7 @@ exports.default = {
     
         /* template */
         Object.assign($124d14, (function () {
-          var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"vsim-picker",style:({fontFamily:_vm.defaultStyle.fontFamily || 'inherit',color:_vm.defaultStyle.color || '#808080',fontSize:_vm.defaultStyle.fontSize || '16px'})},[_c('div',{ref:"parent",staticClass:"vsim-picker-content"},_vm._l((_vm.data),function(list,index){return _c('ul',{key:index,staticClass:"vsim-picker-list",style:({textAlign: list.textAlign || 'center',flex:list.flex || 1}),on:{"touchstart":function($event){_vm.onTouchStart($event,index)},"touchmove":function($event){_vm.onTouchMove($event,index)},"touchend":function($event){_vm.onTouchEnd($event,index)}}},_vm._l((list.values),function(item,number){return _c('li',{key:number,staticClass:"vsim-picker-item"},[_vm._v(_vm._s(list.valueKey ? item[list.valueKey]:item))])}))})),_vm._v(" "),_c('div',{staticClass:"vsim-picker-line-top"}),_vm._v(" "),_c('div',{staticClass:"vsim-picker-line-bottom"})])}
+          var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"vsim-picker",style:({fontFamily:_vm.defaultStyle.fontFamily || 'inherit',color:_vm.defaultStyle.color || '#808080',fontSize:_vm.defaultStyle.fontSize || '16px'})},[_c('div',{staticClass:"vsim-picker-line-top"}),_vm._v(" "),_c('div',{ref:"parent",staticClass:"vsim-picker-content"},_vm._l((_vm.data),function(list,index){return _c('ul',{key:index,staticClass:"vsim-picker-list",style:({textAlign: list.textAlign || 'center',flex:list.flex || 1}),on:{"touchstart":function($event){$event.stopPropagation();_vm.onTouchStart($event,index)},"touchmove":function($event){$event.stopPropagation();_vm.onTouchMove($event,index)},"touchend":function($event){$event.stopPropagation();_vm.onTouchEnd($event,index)}}},_vm._l((list.values),function(item,number){return _c('li',{key:number,staticClass:"vsim-picker-item",attrs:{"data-index":number}},[_vm._v(_vm._s(list.valueKey ? item[list.valueKey]:item))])}))})),_vm._v(" "),_c('div',{staticClass:"vsim-picker-line-bottom"})])}
 var staticRenderFns = []
 
           return {

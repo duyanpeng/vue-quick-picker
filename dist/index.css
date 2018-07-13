@@ -1,13 +1,15 @@
 
 .vsim-picker[data-v-124d14] {
   position: relative;
-  font-size: 16px;
+  /* font-size: 16px; */
   height: 10em;
   overflow: hidden;
+  /* font-family: inherit; */
 }
 .vsim-picker-content[data-v-124d14] {
   display: flex;
   height: 10em;
+  /* padding-top: 4em; */
   overflow: hidden;
 }
 .vsim-picker-line-top[data-v-124d14] {
@@ -17,9 +19,11 @@
   top: 4em;
   left: 0;
   background: #e2e2e2;
+  overflow: hidden;
   transform: scaleY(0.5);
 }
 .vsim-picker-line-bottom[data-v-124d14] {
+  overflow: hidden;
   position: absolute;
   width: 100%;
   height: 1px;
@@ -38,12 +42,12 @@
   line-height: 2em;
 }
 .vsim-picker-item-next[data-v-124d14] {
-  transform: scaleY(0.9);
+  transform: scaleY(0.9) translateZ(0);
 }
 .vsim-picker-item-far[data-v-124d14] {
-  transform: scaleY(0.8);
+  transform: scaleY(0.8) translateZ(0);
 }
 .vsim-picker-item-active[data-v-124d14] {
-  transform: scaleY(1);
+  transform: scaleY(1) translateZ(0);
   color: #474747;
 }
