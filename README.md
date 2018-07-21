@@ -16,7 +16,22 @@ import 'vue-simple-picker/dist/index.css';  // 引入插件相关的css
 
 Vue.use(VueSimplePicker)
 ```
+```
+// 使用vue-cli webpack时在main.js中引入
+import Vue from 'vue';
+// 注意引用的是 vue-simple-picker下的index.js 因为index.js是未打包编译版，直接引用parcel打包之后的版本命令行会有警告(不影响使用)，待以后解决
+import VueSimplePicker from 'vue-simple-picker/index.js';
 
+Vue.use(VueSimplePicker)
+```
+```
+// 直接引用打包之后的版本，不推荐使用，推荐使用上面的方法引入
+import Vue from 'vue';
+import VueSimplePicker from 'vue-simple-picker';
+import 'vue-simple-picker/dist/index.css';  // 引入插件相关的css
+
+Vue.use(VueSimplePicker)
+```
 ## 使用
 ---
 ```html
