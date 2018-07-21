@@ -1,8 +1,8 @@
 {
   "name": "vue-simple-picker",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "基于vue的处理复杂数据的高度定制化的移动端picker插件",
-  "main": "dist/index.js",
+  "main": "index.js",
   "scripts": {
     "dev-test": "parcel watch test/* --no-cache & karma start",
     "test": "parcel build test/* --no-minify && karma start --single-run",
