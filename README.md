@@ -1,4 +1,4 @@
-# vue-simple-picker
+# vue-quick-picker
 [![Build Status](https://travis-ci.org/duyanpeng/vue-simple-picker.svg?branch=master)](https://travis-ci.org/duyanpeng/vue-simple-picker)
 [![npm](https://img.shields.io/npm/v/npm.svg)](https://www.npmjs.com/package/vue-simple-picker)
 ![Read the Docs](https://img.shields.io/readthedocs/pip.svg)
@@ -37,7 +37,7 @@ Vue.use(VueQuickPicker)
 </template>
 ```
 ```javascript
-// 最多只能选当前日期的时间选择器例子
+// 最多只能选当前日期的时间选择器例子
 
 // 输入初始年份，生成到当前年数组
 function initYearValue(year) {
@@ -154,26 +154,27 @@ export default {
 
 ## 配置
 ---
-参数|类型|说明|备注
+参数|类型|说明|备注
 :--:|:--:|:--:|:--:
 v-bind:data|数组[ {},{} ]|数据|picker展示的数据，如时间，地址等
 v-on:change|函数function|回调函数|picker滚动展示的数据变化时触发,返回最新的数据
-ref.refresh(index)|函数function|当改变选项的default值时，需要通知picker重新滚动到default的值|参数传data的index,没有参数则全部滚动到初始default的值
-defaultStyle|对象{}|滚动条目的展现样式|{fontFamily:'inherit',fontSize:'16px',color:'#808080'}提供的配置项
+ref.refresh(index)|函数function|当改变选项的default值时，需要通知picker重新滚动到default的值|参数传data的index,没有参数则全部滚动到初始default的值
+defaultStyle|对象{}|滚动条目的展现样式|{fontFamily:'inherit',fontSize:'16px',color:'#808080'}提供的配置项
 wheelStyle|布尔true/false|是否展示3D样式|默认是true
+canClick|布尔true/false|是否支持点击滚动到目标选项功能|默认是true
 ---
-### data的配置:
-参数|类型|说明|备注
+### data的配置:
+参数|类型|说明|备注
 :--:|:--:|:--:|:--:
 values|数组[ ]|每列的数据|数据可以是字符串，数字，或者对象
 default|数字 number|默认选中项的索引|
-valueKey|字符串 string|当values数组内的值是对象时，通过该属性指定渲染字段|
+valueKey|字符串 string|当values数组内的值是对象时，通过该属性指定渲染字段|
 textAlign|字符串string|指定文字的对齐方式|可选值'center','left','right',默认'center'
 flex|数字number|占宽度的比例|默认：1
 ---
 ### 选中条目样式覆盖方法:
 ![shuoming](/static/shuoming.jpg)
-当前组件类名(或id名)  >>> .vsim-picker-item-active
+当前组件类名(或id名)  >>> .vsim-picker-item-active
 例如:
 ```css
 // 使选中的条目为黑色
@@ -196,7 +197,7 @@ flex|数字number|占宽度的比例|默认：1
 
 ## 版本更新说明
 ---
-版本号|说明|
+版本号|说明|
 :--:|:--:|
 1.0.1|更新文档
 0.0.5|增加样式拓展功能
