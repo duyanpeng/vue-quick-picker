@@ -5,10 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+        }
+        ul,li{
+            list-style: none;
+        }
+    </style>
 </head>
 <body>
     <div id="app">
-        <vs-picker :data="data"></vs-picker>
+        <vs-picker :data="data" @change="handleChange" ref="picker"></vs-picker>
     </div>
     
     <script src="./src/app.js"></script>

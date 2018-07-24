@@ -6,26 +6,26 @@
       <ul class="vsim-picker-list" v-for="(list,index) in data" :key="index" @touchstart.stop="onTouchStart($event,index)" @touchmove.stop="onTouchMove($event,index)" @touchend.stop="onTouchEnd($event,index)" :style="{textAlign: list.textAlign || 'center',flex:list.flex || 1}">
         <li class="vsim-picker-item" v-for="(item,number)  in list.values" :data-index="number" :key="number">{{list.valueKey ? item[list.valueKey]:item}}</li>
       </ul>
-    </div>   
+    </div>
     <div class="vsim-picker-line-bottom"></div>
   </div>
 </template>
 
 <script>
 export default {
-  name: "VuePicker",
+  name: "VueQuickPicker",
   props: {
     data: {
       default: function() {
         return [];
       },
-      type: Array
+      type: [Array, Object]
     },
     // 默认样式
     defaultStyle: {
       default: function() {
         return {
-          fontSize: "16px",
+          fontSize: "18px",
           fontFamily: "inherit",
           color: "#808080"
         };
@@ -37,9 +37,10 @@ export default {
       default: true,
       type: Boolean
     },
-    canClick:{
-      default:true,
-      type:Boolean
+    // 是否点击滚动
+    canClick: {
+      default: true,
+      type: Boolean
     }
   },
   data() {
@@ -71,13 +72,13 @@ export default {
   },
   methods: {
     movePurpose(order, index, e) {
-        this.endMove(
-          e,
-          parseInt(index),
-          2 * parseFloat(this.defaultStyle.fontSize) || 32,
-          0,
-          order
-        );
+      this.endMove(
+        e,
+        parseInt(index),
+        2 * parseFloat(this.defaultStyle.fontSize) || 36,
+        0,
+        order
+      );
     },
     // 通过索引找到对应数据
     computeValue(value) {
@@ -88,6 +89,7 @@ export default {
     // 给选中的picker加active类名
     addClass(order, index, num = 2) {
       this.$nextTick(() => {
+        // 初始化时，children[index-1]会报错
         try {
           if (this.wheelStyle) {
             if (this.$refs.parent.children[order].children[index + 1])
@@ -119,32 +121,44 @@ export default {
       this.endMove(
         this.$refs.parent.children[index],
         defaultValue,
-        2 * parseFloat(this.defaultStyle.fontSize) || 32,
+        2 * parseFloat(this.defaultStyle.fontSize) || 36,
         0,
         index
       );
     },
     // 加载picker到默认选项
-    pickerInit() {
+    pickerInit(which = false) {
       this.$nextTick(() => {
+        if (which) {
+          this.endMove(
+            this.$refs.parent.children[which],
+            this.data[which].default,
+            2 * parseFloat(this.defaultStyle.fontSize) || 36,
+            0,
+            which
+          );
+          return
+        }
         [...this.$refs.parent.children].forEach((element, index) => {
           this.endMove(
             element,
             this.data[index].default,
-            2 * parseFloat(this.defaultStyle.fontSize) || 32,
+            2 * parseFloat(this.defaultStyle.fontSize) || 36,
             0,
             index
           );
         });
       });
     },
-    refresh() {
-      this.pickerInit();
+    // 初始值刷新
+    refresh(count = false) {
+      this.pickerInit(count);
     },
     // 动画
     transformStyle(target, moveDistance, transition, timer = 200) {
       target.style["-webkit-transform"] =
         "translate3d(0," + moveDistance + "px,0)";
+      target.style["transform"] = "translate3d(0," + moveDistance + "px,0)";
       if (transition) {
         target.style.transitionDuration = timer + "ms";
       }
@@ -165,7 +179,6 @@ export default {
       });
       const touch = e.touches[0];
       const touchY = touch.screenY;
-      const screenY = touch.screenY;
       // 记录开始触摸时距屏幕顶端距离
       target.setAttribute("address-start", touchY);
       target.setAttribute("ismove", false); // 是否触发
@@ -207,7 +220,7 @@ export default {
     // 手指离开
     onTouchEnd(e, order) {
       e.preventDefault();
-      const step = 2 * parseFloat(this.defaultStyle.fontSize) || 32;
+      const step = 2 * parseFloat(this.defaultStyle.fontSize) || 36;
       let target = e.target;
 
       if (e.target.tagName === "LI") {
@@ -234,13 +247,13 @@ export default {
       // 记录间隔时间
       const timespace =
         timestamp - parseFloat(target.getAttribute("start-time"));
-      if(
+      if (
         this.canClick &&
-        (Math.abs(absDistance) <= 15 || target.getAttribute("ismove") == 'false') 
-        &&
-         timespace <= 90
-        ){ 
-        this.movePurpose(order,e.target.getAttribute("data-index"),target)
+        (Math.abs(absDistance) <= 15 ||
+          target.getAttribute("ismove") == "false") &&
+        timespace <= 90
+      ) {
+        this.movePurpose(order, e.target.getAttribute("data-index"), target);
         return;
       }
       // 计算速度 = 距离/时间
@@ -305,16 +318,12 @@ export default {
 <style scoped>
 .vsim-picker {
   position: relative;
-  /* font-size: 16px; */
   height: 10em;
   overflow: hidden;
-  /* font-family: inherit; */
 }
-
 .vsim-picker-content {
   display: flex;
   height: 10em;
-  /* padding-top: 4em; */
   overflow: hidden;
 }
 
@@ -343,7 +352,6 @@ export default {
 .vsim-picker-list {
   margin-top: 4em;
   flex: 1;
-  /* font-size: 16px; */
 }
 
 .vsim-picker-item {

@@ -1,15 +1,12 @@
 
 .vsim-picker[data-v-124d14] {
   position: relative;
-  /* font-size: 16px; */
   height: 10em;
   overflow: hidden;
-  /* font-family: inherit; */
 }
 .vsim-picker-content[data-v-124d14] {
   display: flex;
   height: 10em;
-  /* padding-top: 4em; */
   overflow: hidden;
 }
 .vsim-picker-line-top[data-v-124d14] {
@@ -35,7 +32,6 @@
 .vsim-picker-list[data-v-124d14] {
   margin-top: 4em;
   flex: 1;
-  /* font-size: 16px; */
 }
 .vsim-picker-item[data-v-124d14] {
   height: 2em;

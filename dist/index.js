@@ -127,19 +127,19 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 //
 
 exports.default = {
-  name: "VuePicker",
+  name: "VueQuickPicker",
   props: {
     data: {
       default: function _default() {
         return [];
       },
-      type: Array
+      type: [Array, Object]
     },
     // 默认样式
     defaultStyle: {
       default: function _default() {
         return {
-          fontSize: "16px",
+          fontSize: "18px",
           fontFamily: "inherit",
           color: "#808080"
         };
@@ -151,6 +151,7 @@ exports.default = {
       default: true,
       type: Boolean
     },
+    // 是否点击滚动
     canClick: {
       default: true,
       type: Boolean
@@ -187,7 +188,7 @@ exports.default = {
   },
   methods: {
     movePurpose: function movePurpose(order, index, e) {
-      this.endMove(e, parseInt(index), 2 * parseFloat(this.defaultStyle.fontSize) || 32, 0, order);
+      this.endMove(e, parseInt(index), 2 * parseFloat(this.defaultStyle.fontSize) || 36, 0, order);
     },
 
     // 通过索引找到对应数据
@@ -206,6 +207,7 @@ exports.default = {
       var num = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 2;
 
       this.$nextTick(function () {
+        // 初始化时，children[index-1]会报错
         try {
           if (_this2.wheelStyle) {
             if (_this2.$refs.parent.children[order].children[index + 1]) _this2.$refs.parent.children[order].children[index + 1].className = "vsim-picker-item vsim-picker-item-next";
@@ -226,21 +228,31 @@ exports.default = {
 
     // 设置picker的值
     setPickerValue: function setPickerValue(index, defaultValue) {
-      this.endMove(this.$refs.parent.children[index], defaultValue, 2 * parseFloat(this.defaultStyle.fontSize) || 32, 0, index);
+      this.endMove(this.$refs.parent.children[index], defaultValue, 2 * parseFloat(this.defaultStyle.fontSize) || 36, 0, index);
     },
 
     // 加载picker到默认选项
     pickerInit: function pickerInit() {
       var _this3 = this;
 
+      var which = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
       this.$nextTick(function () {
+        if (which) {
+          _this3.endMove(_this3.$refs.parent.children[which], _this3.data[which].default, 2 * parseFloat(_this3.defaultStyle.fontSize) || 36, 0, which);
+          return;
+        }
         [].concat(_toConsumableArray(_this3.$refs.parent.children)).forEach(function (element, index) {
-          _this3.endMove(element, _this3.data[index].default, 2 * parseFloat(_this3.defaultStyle.fontSize) || 32, 0, index);
+          _this3.endMove(element, _this3.data[index].default, 2 * parseFloat(_this3.defaultStyle.fontSize) || 36, 0, index);
         });
       });
     },
+
+    // 初始值刷新
     refresh: function refresh() {
-      this.pickerInit();
+      var count = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
+      this.pickerInit(count);
     },
 
     // 动画
@@ -248,6 +260,7 @@ exports.default = {
       var timer = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 200;
 
       target.style["-webkit-transform"] = "translate3d(0," + moveDistance + "px,0)";
+      target.style["transform"] = "translate3d(0," + moveDistance + "px,0)";
       if (transition) {
         target.style.transitionDuration = timer + "ms";
       }
@@ -269,7 +282,6 @@ exports.default = {
       });
       var touch = e.touches[0];
       var touchY = touch.screenY;
-      var screenY = touch.screenY;
       // 记录开始触摸时距屏幕顶端距离
       target.setAttribute("address-start", touchY);
       target.setAttribute("ismove", false); // 是否触发
@@ -310,7 +322,7 @@ exports.default = {
     // 手指离开
     onTouchEnd: function onTouchEnd(e, order) {
       e.preventDefault();
-      var step = 2 * parseFloat(this.defaultStyle.fontSize) || 32;
+      var step = 2 * parseFloat(this.defaultStyle.fontSize) || 36;
       var target = e.target;
 
       if (e.target.tagName === "LI") {
@@ -331,7 +343,7 @@ exports.default = {
       var timestamp = new Date().getTime();
       // 记录间隔时间
       var timespace = timestamp - parseFloat(target.getAttribute("start-time"));
-      if (this.canClick && (Math.abs(absDistance) <= 15 || target.getAttribute("ismove") == 'false') && timespace <= 90) {
+      if (this.canClick && (Math.abs(absDistance) <= 15 || target.getAttribute("ismove") == "false") && timespace <= 90) {
         this.movePurpose(order, e.target.getAttribute("data-index"), target);
         return;
       }

@@ -10327,18 +10327,41 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 //
 
 exports.default = {
-  name: "VuePicker",
+  name: "VueQuickPicker",
   props: {
     data: {
       default: function _default() {
         return [];
-      }
+      },
+      type: [Array, Object]
+    },
+    // 默认样式
+    defaultStyle: {
+      default: function _default() {
+        return {
+          fontSize: "18px",
+          fontFamily: "inherit",
+          color: "#808080"
+        };
+      },
+      type: Object
+    },
+    // 是否展示滚轮样式
+    wheelStyle: {
+      default: true,
+      type: Boolean
+    },
+    // 是否点击滚动
+    canClick: {
+      default: true,
+      type: Boolean
     }
   },
   data: function data() {
     return {
       timer: "",
-      value: []
+      value: [],
+      lastValue: [] // 记录上一次的value值判断是否触发change事件
     };
   },
 
@@ -10364,6 +10387,10 @@ exports.default = {
     }
   },
   methods: {
+    movePurpose: function movePurpose(order, index, e) {
+      this.endMove(e, parseInt(index), 2 * parseFloat(this.defaultStyle.fontSize) || 36, 0, order);
+    },
+
     // 通过索引找到对应数据
     computeValue: function computeValue(value) {
       var _this = this;
@@ -10380,27 +10407,52 @@ exports.default = {
       var num = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 2;
 
       this.$nextTick(function () {
-        if (_this2.$refs.parent.children[order].children[index + 1]) _this2.$refs.parent.children[order].children[index + 1].className = "vsim-picker-item vsim-picker-item-scale9";
+        // 初始化时，children[index-1]会报错
+        try {
+          if (_this2.wheelStyle) {
+            if (_this2.$refs.parent.children[order].children[index + 1]) _this2.$refs.parent.children[order].children[index + 1].className = "vsim-picker-item vsim-picker-item-next";
 
-        if (_this2.$refs.parent.children[order].children[index - 1]) _this2.$refs.parent.children[order].children[index - 1].className = "vsim-picker-item vsim-picker-item-scale9";
+            if (_this2.$refs.parent.children[order].children[index - 1]) _this2.$refs.parent.children[order].children[index - 1].className = "vsim-picker-item vsim-picker-item-next";
 
-        if (_this2.$refs.parent.children[order].children[index + 2]) _this2.$refs.parent.children[order].children[index + 2].className = "vsim-picker-item vsim-picker-item-scale8";
+            if (_this2.$refs.parent.children[order].children[index + 2]) _this2.$refs.parent.children[order].children[index + 2].className = "vsim-picker-item vsim-picker-item-far";
 
-        if (_this2.$refs.parent.children[order].children[index - 2]) _this2.$refs.parent.children[order].children[index - 2].className = "vsim-picker-item vsim-picker-item-scale8";
+            if (_this2.$refs.parent.children[order].children[index - 2]) _this2.$refs.parent.children[order].children[index - 2].className = "vsim-picker-item vsim-picker-item-far";
+          }
 
-        _this2.$refs.parent.children[order].children[index].className = "vsim-picker-item vsim-picker-item-active";
+          _this2.$refs.parent.children[order].children[index].className = "vsim-picker-item vsim-picker-item-active";
+        } catch (e) {
+          console.warn(e.message, "vue-simple-picker");
+        }
       });
+    },
+
+    // 设置picker的值
+    setPickerValue: function setPickerValue(index, defaultValue) {
+      this.endMove(this.$refs.parent.children[index], defaultValue, 2 * parseFloat(this.defaultStyle.fontSize) || 36, 0, index);
     },
 
     // 加载picker到默认选项
     pickerInit: function pickerInit() {
       var _this3 = this;
 
+      var which = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
       this.$nextTick(function () {
+        if (which) {
+          _this3.endMove(_this3.$refs.parent.children[which], _this3.data[which].default, 2 * parseFloat(_this3.defaultStyle.fontSize) || 36, 0, which);
+          return;
+        }
         [].concat(_toConsumableArray(_this3.$refs.parent.children)).forEach(function (element, index) {
-          _this3.endMove(element, _this3.data[index].default, 32, 0, index);
+          _this3.endMove(element, _this3.data[index].default, 2 * parseFloat(_this3.defaultStyle.fontSize) || 36, 0, index);
         });
       });
+    },
+
+    // 初始值刷新
+    refresh: function refresh() {
+      var count = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
+      this.pickerInit(count);
     },
 
     // 动画
@@ -10408,19 +10460,35 @@ exports.default = {
       var timer = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 200;
 
       target.style["-webkit-transform"] = "translate3d(0," + moveDistance + "px,0)";
+      target.style["transform"] = "translate3d(0," + moveDistance + "px,0)";
       if (transition) {
         target.style.transitionDuration = timer + "ms";
       }
     },
+
+    // 触摸开始
     onTouchStart: function onTouchStart(e, index) {
       e.preventDefault();
-      var target = e.target.parentElement;
+      // 确定触摸的对象是li
+      var target = e.target;
+      if (e.target.tagName === "LI") {
+        target = e.target.parentElement;
+      } else {
+        return;
+      }
+      // 清空选中的active样式
+      [].concat(_toConsumableArray(this.$refs.parent.children[index].children)).forEach(function (item) {
+        item.className = "vsim-picker-item";
+      });
       var touch = e.touches[0];
       var touchY = touch.screenY;
-      var screenY = touch.screenY;
+      // 记录开始触摸时距屏幕顶端距离
       target.setAttribute("address-start", touchY);
-      var timestamp = new Date().getTime(); // 当前时间戳
+      target.setAttribute("ismove", false); // 是否触发
+      var timestamp = new Date().getTime();
+      // 记录开始触摸时间
       target.setAttribute("start-time", timestamp);
+      // 判断是否是第一次触摸
       if (!target.getAttribute("mov-distance")) {
         // 存储当前位置
         target.setAttribute("pos-start", touchY);
@@ -10429,9 +10497,16 @@ exports.default = {
       }
       target.style.transitionDuration = "0ms";
     },
+
+    // 手指移动中
     onTouchMove: function onTouchMove(e, index) {
       e.preventDefault();
-      var target = e.target.parentElement;
+      var target = e.target;
+      if (e.target.tagName === "LI") {
+        target = e.target.parentElement;
+      } else {
+        return;
+      }
       var touch = e.touches[0];
 
       var touchY = touch.screenY;
@@ -10439,24 +10514,48 @@ exports.default = {
       var moveDistance = touchY - target.getAttribute("pos-start");
       target.setAttribute("pos-end", touchY);
       target.setAttribute("address-end", touchY);
+      target.setAttribute("ismove", true); // 是否触发
       // 移动
       this.transformStyle(target, moveDistance);
     },
+
+    // 手指离开
     onTouchEnd: function onTouchEnd(e, order) {
       e.preventDefault();
-      var step = 32;
-      var target = e.target.parentElement;
+      var step = 2 * parseFloat(this.defaultStyle.fontSize) || 36;
+      var target = e.target;
+
+      if (e.target.tagName === "LI") {
+        target = e.target.parentElement;
+      } else {
+        return;
+      }
+
       var touchY = target.getAttribute("pos-end");
       var moveDistance = touchY - target.getAttribute("pos-start");
-      var index = Math.abs(Math.round(moveDistance / step)); // 格子数
+
+      // 判断应该移动多少个li
+      var index = Math.abs(Math.round(moveDistance / step));
 
       // 记录移动的距离
-      var absDistance = parseFloat(target.getAttribute("address-start")) - parseFloat(target.getAttribute("address-end"));
+      var absDistance = parseFloat(target.getAttribute("address-start")) - parseFloat(target.getAttribute("address-end") || target.getAttribute("address-start"));
+
       var timestamp = new Date().getTime();
       // 记录间隔时间
       var timespace = timestamp - parseFloat(target.getAttribute("start-time"));
-      var rate = Math.round(absDistance) / timespace; // 变化比值
-      this.timer = rate * this.data[order].values.length / 5;
+      if (this.canClick && (Math.abs(absDistance) <= 15 || target.getAttribute("ismove") == "false") && timespace <= 90) {
+        this.movePurpose(order, e.target.getAttribute("data-index"), target);
+        return;
+      }
+      // 计算速度 = 距离/时间
+      var rate = absDistance / timespace;
+      // console.log(rate,'rate')
+      this.timer = rate * 6;
+
+      if (Math.abs(this.timer) <= 2) {
+        this.timer = 0;
+      }
+      // 惯性滚动距离及速度
       index = Math.round(index + this.timer);
       var speed = 200;
       if (Math.abs(Math.floor(this.timer)) >= 2) {
@@ -10471,6 +10570,7 @@ exports.default = {
       if (index < 0) {
         index = 0;
       }
+      // 边界情况
       if (index > this.data[order].values.length - 1) {
         index = this.data[order].values.length - 1;
       }
@@ -10502,7 +10602,10 @@ exports.default = {
       this.value[order] = index;
       this.addClass(order, index);
       if (this.value.length === this.data.length) {
-        this.$emit("change", this.computeValue(this.value));
+        if (JSON.stringify(this.lastValue) === JSON.stringify(this.value)) {} else {
+          this.$emit("change", this.computeValue(this.value));
+          this.lastValue = JSON.parse(JSON.stringify(this.value));
+        }
       }
     }
   }
@@ -10519,42 +10622,65 @@ exports.default = {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "vsim-picker" }, [
-    _c(
-      "div",
-      { ref: "parent", staticClass: "vsim-picker-content" },
-      _vm._l(_vm.data, function(list, index) {
-        return _c(
-          "ul",
-          {
-            key: index,
-            staticClass: "vsim-picker-list",
-            style: { textAlign: list.textAlign || "center" },
-            on: {
-              touchstart: function($event) {
-                _vm.onTouchStart($event, index)
+  return _c(
+    "div",
+    {
+      staticClass: "vsim-picker",
+      style: {
+        fontFamily: _vm.defaultStyle.fontFamily || "inherit",
+        color: _vm.defaultStyle.color || "#808080",
+        fontSize: _vm.defaultStyle.fontSize || "16px"
+      }
+    },
+    [
+      _c("div", { staticClass: "vsim-picker-line-top" }),
+      _vm._v(" "),
+      _c(
+        "div",
+        { ref: "parent", staticClass: "vsim-picker-content" },
+        _vm._l(_vm.data, function(list, index) {
+          return _c(
+            "ul",
+            {
+              key: index,
+              staticClass: "vsim-picker-list",
+              style: {
+                textAlign: list.textAlign || "center",
+                flex: list.flex || 1
               },
-              touchmove: function($event) {
-                _vm.onTouchMove($event, index)
-              },
-              touchend: function($event) {
-                _vm.onTouchEnd($event, index)
+              on: {
+                touchstart: function($event) {
+                  $event.stopPropagation()
+                  _vm.onTouchStart($event, index)
+                },
+                touchmove: function($event) {
+                  $event.stopPropagation()
+                  _vm.onTouchMove($event, index)
+                },
+                touchend: function($event) {
+                  $event.stopPropagation()
+                  _vm.onTouchEnd($event, index)
+                }
               }
-            }
-          },
-          _vm._l(list.values, function(item, number) {
-            return _c("li", { key: number, staticClass: "vsim-picker-item" }, [
-              _vm._v(_vm._s(list.valueKey ? item[list.valueKey] : item))
-            ])
-          })
-        )
-      })
-    ),
-    _vm._v(" "),
-    _c("div", { staticClass: "vsim-picker-line-top" }),
-    _vm._v(" "),
-    _c("div", { staticClass: "vsim-picker-line-bottom" })
-  ])
+            },
+            _vm._l(list.values, function(item, number) {
+              return _c(
+                "li",
+                {
+                  key: number,
+                  staticClass: "vsim-picker-item",
+                  attrs: { "data-index": number }
+                },
+                [_vm._v(_vm._s(list.valueKey ? item[list.valueKey] : item))]
+              )
+            })
+          )
+        })
+      ),
+      _vm._v(" "),
+      _c("div", { staticClass: "vsim-picker-line-bottom" })
+    ]
+  )
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -10603,32 +10729,117 @@ var _VueSimplePicker2 = _interopRequireDefault(_VueSimplePicker);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 _vue2.default.component('vs-picker', _VueSimplePicker2.default);
+// 输入初始年份，生成到当前年数组
+function initYearValue(year) {
+    var arr = [];
+    var length = new Date().getYear() + 1900;
+    for (var i = year; i <= length; i++) {
+        arr.push(i);
+    }
+    return arr;
+}
+// 输入最大月份，生成月份数组
+function initLimitMonth(month) {
+    var arr = [];
+    for (var i = 1; i <= parseFloat(month); i++) {
+        arr.push(i);
+    }
+    return arr;
+}
+// 输入最大日期，生成日期数组
+function initLimitDay(day) {
+    var arr = [];
+    for (var i = 1; i <= parseFloat(day); i++) {
+        arr.push(i);
+    }
+    return arr;
+}
 
 new _vue2.default({
     el: '#app',
     data: {
+        value: [],
         data: [{
-            flex: 1,
-            values: [2016, 2018, 2018, 2019],
-            default: new Date().getYear() + 1900 - 2016,
-            className: "slot1",
-            textAlign: "center"
+            values: initYearValue(2015),
+            default: new Date().getYear() + 1900 - 2015
         }, {
-            flex: 1,
-            values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-            className: "slot3",
-            default: new Date().getMonth(),
-            textAlign: "center"
+            values: initLimitMonth(12),
+            default: new Date().getMonth()
         }, {
-            flex: 1,
             default: new Date().getDate() - 1,
-            values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
-            className: "slot3",
-            textAlign: "center"
+            values: initLimitDay(31)
         }]
-    }
+    },
+    methods: {
+        // 获得时间回调
+        handleChange: function handleChange() {
+            var values = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+
+            // 当前年月日
+            var nYear = new Date().getYear() + 1900;
+            var nMonth = new Date().getMonth() + 1;
+            var nDay = new Date().getDate();
+            // 年或月改变都要重新计算该月的最大天数
+            if (values[0] !== this.value[0] || values[1] !== this.value[1]) {
+                this.refreshDay(values[0], values[1], values[2]);
+            }
+            if (values[0] !== nYear) {
+                this.refreshMonth();
+            }
+            // 当年等于当前年时，限制最大月
+            if (values[0] === nYear) {
+                this.refreshMonth(values[1]);
+            }
+            // 当年月等于当前日期时，限制最多只能选择当前日期
+            if (values[0] === nYear && values[1] === nMonth) {
+                this.refreshDay(values[0], values[1], values[2], new Date().getDate());
+            }
+            this.value = values;
+        },
+
+        // 根据年月 返回当月最大天数，如31天30天或2月的28天或29天等情况
+        getMonthDay: function getMonthDay(year, month) {
+            var dayNum = new Date(year, month, 0); //获取当月的最后一天
+            var day = dayNum.getDate();
+            return day;
+        },
+
+        // 重新生成最大天数
+        refreshDay: function refreshDay(year, month, day) {
+            var limitDay = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+            // 最后一天
+            var lastDay = limitDay ? limitDay : this.getMonthDay(year, month);
+            var dayValues = initLimitDay(lastDay);
+            var dayItem = {
+                values: dayValues,
+                // 如果已经选中了大于该月最后一天的天数，则滚动到该月最后一天
+                default: day > lastDay - 1 ? lastDay - 1 : day - 1
+            };
+            this.$set(this.data, 2, dayItem);
+            // default改变重新刷新picker参数传index
+            this.$refs.picker.refresh(2);
+        },
+
+        // 重新生成最大月
+        refreshMonth: function refreshMonth(month) {
+            if (!month) {
+                this.data[1].values = initLimitMonth(12);
+                return;
+            }
+            var monthItem = {
+                values: initLimitMonth(new Date().getMonth() + 1),
+                // 如果已经选中了大于该月最后一天的天数，则滚动到该月最后一天
+                default: month > new Date().getMonth() + 1 ? new Date().getMonth() : month - 1
+            };
+            this.$set(this.data, 1, monthItem);
+            // default改变重新刷新picker参数传index
+            this.$refs.picker.refresh(1);
+        }
+    },
+    mounted: function mounted() {}
 });
-},{"vue":8,"./VueSimplePicker.vue":6}],23:[function(require,module,exports) {
+},{"vue":8,"./VueSimplePicker.vue":6}],30:[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 
@@ -10657,7 +10868,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '52804' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '52795' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 
@@ -10798,5 +11009,5 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.parcelRequire, id);
   });
 }
-},{}]},{},[23,4], null)
+},{}]},{},[30,4], null)
 //# sourceMappingURL=/app.17209085.map
