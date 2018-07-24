@@ -5,6 +5,7 @@
 
 基于vue的适用于处理复杂数据的高度定制化的移动端picker插件
 
+![picker](./static/picker.gif)
 ## 安装
 ---
 `npm install vue-simple-picker -S`
