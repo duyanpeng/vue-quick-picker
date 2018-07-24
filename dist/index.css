@@ -1,15 +1,15 @@
 
-.vsim-picker[data-v-124d14] {
+.vsim-picker[data-v-f73c2b] {
   position: relative;
   height: 10em;
   overflow: hidden;
 }
-.vsim-picker-content[data-v-124d14] {
+.vsim-picker-content[data-v-f73c2b] {
   display: flex;
   height: 10em;
   overflow: hidden;
 }
-.vsim-picker-line-top[data-v-124d14] {
+.vsim-picker-line-top[data-v-f73c2b] {
   position: absolute;
   width: 100%;
   height: 1px;
@@ -19,7 +19,7 @@
   overflow: hidden;
   transform: scaleY(0.5);
 }
-.vsim-picker-line-bottom[data-v-124d14] {
+.vsim-picker-line-bottom[data-v-f73c2b] {
   overflow: hidden;
   position: absolute;
   width: 100%;
@@ -29,21 +29,21 @@
   background: #e2e2e2;
   transform: scaleY(0.5);
 }
-.vsim-picker-list[data-v-124d14] {
+.vsim-picker-list[data-v-f73c2b] {
   margin-top: 4em;
   flex: 1;
 }
-.vsim-picker-item[data-v-124d14] {
+.vsim-picker-item[data-v-f73c2b] {
   height: 2em;
   line-height: 2em;
 }
-.vsim-picker-item-next[data-v-124d14] {
+.vsim-picker-item-next[data-v-f73c2b] {
   transform: scaleY(0.9) translateZ(0);
 }
-.vsim-picker-item-far[data-v-124d14] {
+.vsim-picker-item-far[data-v-f73c2b] {
   transform: scaleY(0.8) translateZ(0);
 }
-.vsim-picker-item-active[data-v-124d14] {
+.vsim-picker-item-active[data-v-f73c2b] {
   transform: scaleY(1) translateZ(0);
   color: #474747;
 }

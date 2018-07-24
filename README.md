@@ -8,31 +8,31 @@
 ![picker](./static/picker.gif)
 ## 安装
 ---
-`npm install vue-simple-picker -S`
+`npm install vue-quick-picker -S`
 
 ```
 // 使用vue-cli webpack时在main.js中引入
 import Vue from 'vue';
 
-import VueSimplePicker from 'vue-simple-picker';
+import VueQuickPicker from 'vue-quick-picker';
 
-Vue.use(VueSimplePicker)
+Vue.use(VueQuickPicker)
 ```
 ```
 // 直接引用打包之后的版本，不推荐使用，推荐使用上面的方法引入
 import Vue from 'vue';
-// 注意引用的是 vue-simple-picker下的index.js
-import VueSimplePicker from 'vue-simple-picker/dist/index.js';
-import 'vue-simple-picker/dist/index.css';  // 引入插件相关的css
+// 注意引用的是 vue-quick-picker下的dist/index.js
+import VueQuickPicker from 'vue-quick-picker/dist/index.js';
+import 'vue-quick-picker/dist/index.css';  // 引入插件相关的css
 
-Vue.use(VueSimplePicker)
+Vue.use(VueQuickPicker)
 ```
 ## 使用
 ---
 ```html
 <template>
     <div>
-        <vs-picker :data="data" @change="handleChange" ref="picker"></vs-picker>
+        <quick-picker :data="data" @change="handleChange" ref="picker"></quick-picker>
     </div>
 </template>
 ```
@@ -198,6 +198,7 @@ flex|数字number|占宽度的比例|默认：1
 ---
 版本号|说明|
 :--:|:--:|
+1.0.1|更新文档
 0.0.5|增加样式拓展功能
 0.0.4|增加单元测试
 0.0.3|增加readme文档

@@ -410,14 +410,14 @@ exports.default = {
     }
   }
 };
-        var $124d14 = exports.default || module.exports;
+        var $f73c2b = exports.default || module.exports;
       
-      if (typeof $124d14 === 'function') {
-        $124d14 = $124d14.options;
+      if (typeof $f73c2b === 'function') {
+        $f73c2b = $f73c2b.options;
       }
     
         /* template */
-        Object.assign($124d14, (function () {
+        Object.assign($f73c2b, (function () {
           var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"vsim-picker",style:({fontFamily:_vm.defaultStyle.fontFamily || 'inherit',color:_vm.defaultStyle.color || '#808080',fontSize:_vm.defaultStyle.fontSize || '16px'})},[_c('div',{staticClass:"vsim-picker-line-top"}),_vm._v(" "),_c('div',{ref:"parent",staticClass:"vsim-picker-content"},_vm._l((_vm.data),function(list,index){return _c('ul',{key:index,staticClass:"vsim-picker-list",style:({textAlign: list.textAlign || 'center',flex:list.flex || 1}),on:{"touchstart":function($event){$event.stopPropagation();_vm.onTouchStart($event,index)},"touchmove":function($event){$event.stopPropagation();_vm.onTouchMove($event,index)},"touchend":function($event){$event.stopPropagation();_vm.onTouchEnd($event,index)}}},_vm._l((list.values),function(item,number){return _c('li',{key:number,staticClass:"vsim-picker-item",attrs:{"data-index":number}},[_vm._v(_vm._s(list.valueKey ? item[list.valueKey]:item))])}))})),_vm._v(" "),_c('div',{staticClass:"vsim-picker-line-bottom"})])}
 var staticRenderFns = []
 
@@ -425,7 +425,7 @@ var staticRenderFns = []
             render: render,
             staticRenderFns: staticRenderFns,
             _compiled: true,
-            _scopeId: "data-v-124d14",
+            _scopeId: "data-v-f73c2b",
             functional: undefined
           };
         })());
@@ -444,7 +444,7 @@ var _VueSimplePicker2 = _interopRequireDefault(_VueSimplePicker);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = function (Vue) {
-    Vue.component('vs-picker', _VueSimplePicker2.default);
+    Vue.component('quick-picker', _VueSimplePicker2.default);
 };
 },{"./src/VueSimplePicker.vue":3}]},{},[1], null)
 //# sourceMappingURL=/index.map
