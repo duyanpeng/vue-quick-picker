@@ -1,6 +1,6 @@
 {
-  "name": "vue-simple-picker",
-  "version": "1.0.2",
+  "name": "vue-quick-picker",
+  "version": "1.0.0",
   "description": "基于vue的处理复杂数据的高度定制化的移动端picker插件",
   "main": "index.js",
   "scripts": {
