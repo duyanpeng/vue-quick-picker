@@ -61,9 +61,11 @@ export default {
   watch: {
     data: {
       handler: function(nextProp, oldProp) {
+       
         if (JSON.stringify(nextProp) === JSON.stringify(oldProp)) {
           return;
         }
+
         this.value = [];
         this.pickerInit();
       },
@@ -112,7 +114,7 @@ export default {
           this.$refs.parent.children[order].children[index].className =
             "vsim-picker-item vsim-picker-item-active";
         } catch (e) {
-          console.warn(e.message, "vue-simple-picker");
+        //  console.warn(e.message, "vue-simple-picker");
         }
       });
     },
@@ -166,25 +168,31 @@ export default {
     // 触摸开始
     onTouchStart(e, index) {
       e.preventDefault();
-      // 确定触摸的对象是li
+
+      // 当触摸li时,确定target对象
       let target = e.target;
       if (e.target.tagName === "LI") {
         target = e.target.parentElement;
       } else {
         return;
       }
+
       // 清空选中的active样式
       [...this.$refs.parent.children[index].children].forEach(item => {
         item.className = "vsim-picker-item";
       });
+      
       const touch = e.touches[0];
       const touchY = touch.screenY;
       // 记录开始触摸时距屏幕顶端距离
       target.setAttribute("address-start", touchY);
+
       target.setAttribute("ismove", false); // 是否触发
-      const timestamp = new Date().getTime();
+
       // 记录开始触摸时间
+      const timestamp = new Date().getTime();
       target.setAttribute("start-time", timestamp);
+
       // 判断是否是第一次触摸
       if (!target.getAttribute("mov-distance")) {
         // 存储当前位置
@@ -206,6 +214,7 @@ export default {
       } else {
         return;
       }
+
       const touch = e.touches[0];
 
       const touchY = touch.screenY;
@@ -304,6 +313,7 @@ export default {
       this.value[order] = index;
       this.addClass(order, index);
       if (this.value.length === this.data.length) {
+        // 避免重复触发change事件
         if (JSON.stringify(this.lastValue) === JSON.stringify(this.value)) {
         } else {
           this.$emit("change", this.computeValue(this.value));
