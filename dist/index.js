@@ -221,7 +221,7 @@ exports.default = {
 
           _this2.$refs.parent.children[order].children[index].className = "vsim-picker-item vsim-picker-item-active";
         } catch (e) {
-          console.warn(e.message, "vue-simple-picker");
+          // console.warn(e.message, "vue-simple-picker");
         }
       });
     },
@@ -255,7 +255,14 @@ exports.default = {
       this.pickerInit(count);
     },
 
+
     // 动画
+    /**
+     * target:目标元素
+     * moveDistance:滚动距离
+     * transition:是否开启动画
+     * timer:动画时间
+     */
     transformStyle: function transformStyle(target, moveDistance, transition) {
       var timer = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 200;
 
@@ -266,28 +273,35 @@ exports.default = {
       }
     },
 
+
     // 触摸开始
     onTouchStart: function onTouchStart(e, index) {
       e.preventDefault();
-      // 确定触摸的对象是li
+
+      // 当触摸li时,确定target对象
       var target = e.target;
       if (e.target.tagName === "LI") {
         target = e.target.parentElement;
       } else {
         return;
       }
+
       // 清空选中的active样式
       [].concat(_toConsumableArray(this.$refs.parent.children[index].children)).forEach(function (item) {
         item.className = "vsim-picker-item";
       });
+
       var touch = e.touches[0];
       var touchY = touch.screenY;
       // 记录开始触摸时距屏幕顶端距离
       target.setAttribute("address-start", touchY);
+
       target.setAttribute("ismove", false); // 是否触发
-      var timestamp = new Date().getTime();
+
       // 记录开始触摸时间
+      var timestamp = new Date().getTime();
       target.setAttribute("start-time", timestamp);
+
       // 判断是否是第一次触摸
       if (!target.getAttribute("mov-distance")) {
         // 存储当前位置
@@ -307,6 +321,7 @@ exports.default = {
       } else {
         return;
       }
+
       var touch = e.touches[0];
 
       var touchY = touch.screenY;
@@ -324,7 +339,6 @@ exports.default = {
       e.preventDefault();
       var step = 2 * parseFloat(this.defaultStyle.fontSize) || 36;
       var target = e.target;
-
       if (e.target.tagName === "LI") {
         target = e.target.parentElement;
       } else {
@@ -402,8 +416,9 @@ exports.default = {
       this.value[order] = index;
       this.addClass(order, index);
       if (this.value.length === this.data.length) {
+        // 避免重复触发change事件
         if (JSON.stringify(this.lastValue) === JSON.stringify(this.value)) {} else {
-          this.$emit("change", this.computeValue(this.value));
+          this.$emit("change", this.computeValue(this.value), JSON.parse(JSON.stringify(this.value)));
           this.lastValue = JSON.parse(JSON.stringify(this.value));
         }
       }
