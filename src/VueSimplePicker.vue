@@ -61,11 +61,9 @@ export default {
   watch: {
     data: {
       handler: function(nextProp, oldProp) {
-       
         if (JSON.stringify(nextProp) === JSON.stringify(oldProp)) {
           return;
         }
-
         this.value = [];
         this.pickerInit();
       },
@@ -114,7 +112,7 @@ export default {
           this.$refs.parent.children[order].children[index].className =
             "vsim-picker-item vsim-picker-item-active";
         } catch (e) {
-        //  console.warn(e.message, "vue-simple-picker");
+         // console.warn(e.message, "vue-simple-picker");
         }
       });
     },
@@ -156,7 +154,14 @@ export default {
     refresh(count = false) {
       this.pickerInit(count);
     },
+
     // 动画
+    /**
+     * target:目标元素
+     * moveDistance:滚动距离
+     * transition:是否开启动画
+     * timer:动画时间
+     */
     transformStyle(target, moveDistance, transition, timer = 200) {
       target.style["-webkit-transform"] =
         "translate3d(0," + moveDistance + "px,0)";
@@ -165,6 +170,7 @@ export default {
         target.style.transitionDuration = timer + "ms";
       }
     },
+    
     // 触摸开始
     onTouchStart(e, index) {
       e.preventDefault();
@@ -231,7 +237,6 @@ export default {
       e.preventDefault();
       const step = 2 * parseFloat(this.defaultStyle.fontSize) || 36;
       let target = e.target;
-
       if (e.target.tagName === "LI") {
         target = e.target.parentElement;
       } else {
@@ -316,11 +321,12 @@ export default {
         // 避免重复触发change事件
         if (JSON.stringify(this.lastValue) === JSON.stringify(this.value)) {
         } else {
-          this.$emit("change", this.computeValue(this.value));
+          this.$emit("change", this.computeValue(this.value),JSON.parse(JSON.stringify(this.value)));
           this.lastValue = JSON.parse(JSON.stringify(this.value));
         }
       }
-    }
+    },
+    
   }
 };
 </script>

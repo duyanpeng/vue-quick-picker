@@ -10030,7 +10030,7 @@ function getBaseURL(url) {
 
 exports.getBundleURL = getBundleURLCached;
 exports.getBaseURL = getBaseURL;
-},{}],14:[function(require,module,exports) {
+},{}],16:[function(require,module,exports) {
 var bundle = require('./bundle-url');
 
 function updateLink(link) {
@@ -10061,7 +10061,7 @@ function reloadCSS() {
 }
 
 module.exports = reloadCSS;
-},{"./bundle-url":18}],16:[function(require,module,exports) {
+},{"./bundle-url":18}],14:[function(require,module,exports) {
 var Vue // late bind
 var version
 var map = (window.__VUE_HOT_MAP__ = Object.create(null))
@@ -10377,11 +10377,9 @@ exports.default = {
   watch: {
     data: {
       handler: function handler(nextProp, oldProp) {
-
         if (JSON.stringify(nextProp) === JSON.stringify(oldProp)) {
           return;
         }
-
         this.value = [];
         this.pickerInit();
       },
@@ -10423,7 +10421,7 @@ exports.default = {
 
           _this2.$refs.parent.children[order].children[index].className = "vsim-picker-item vsim-picker-item-active";
         } catch (e) {
-          //  console.warn(e.message, "vue-simple-picker");
+          // console.warn(e.message, "vue-simple-picker");
         }
       });
     },
@@ -10457,7 +10455,14 @@ exports.default = {
       this.pickerInit(count);
     },
 
+
     // 动画
+    /**
+     * target:目标元素
+     * moveDistance:滚动距离
+     * transition:是否开启动画
+     * timer:动画时间
+     */
     transformStyle: function transformStyle(target, moveDistance, transition) {
       var timer = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 200;
 
@@ -10467,6 +10472,7 @@ exports.default = {
         target.style.transitionDuration = timer + "ms";
       }
     },
+
 
     // 触摸开始
     onTouchStart: function onTouchStart(e, index) {
@@ -10533,7 +10539,6 @@ exports.default = {
       e.preventDefault();
       var step = 2 * parseFloat(this.defaultStyle.fontSize) || 36;
       var target = e.target;
-
       if (e.target.tagName === "LI") {
         target = e.target.parentElement;
       } else {
@@ -10613,7 +10618,7 @@ exports.default = {
       if (this.value.length === this.data.length) {
         // 避免重复触发change事件
         if (JSON.stringify(this.lastValue) === JSON.stringify(this.value)) {} else {
-          this.$emit("change", this.computeValue(this.value));
+          this.$emit("change", this.computeValue(this.value), JSON.parse(JSON.stringify(this.value)));
           this.lastValue = JSON.parse(JSON.stringify(this.value));
         }
       }
@@ -10725,7 +10730,7 @@ render._withStripped = true
       
       }
     })();
-},{"_css_loader":14,"vue-hot-reload-api":16,"vue":8}],4:[function(require,module,exports) {
+},{"_css_loader":16,"vue-hot-reload-api":14,"vue":8}],4:[function(require,module,exports) {
 'use strict';
 
 var _vue = require('vue');
@@ -10781,10 +10786,36 @@ new _vue2.default({
         }]
     },
     methods: {
+        changeDefault: function changeDefault() {
+            this.data = [{
+                values: initYearValue(2015),
+                default: 0
+            }, {
+                values: initLimitMonth(12),
+                default: 2
+            }, {
+                default: 3,
+                values: initLimitDay(31)
+            }];
+        },
+        changeValue: function changeValue() {
+            this.data = [{
+                values: ['a', 'b', 'c', 'd'],
+                default: 0
+            }, {
+                values: ['a', 'b', 'c', 'd'],
+                default: 2
+            }, {
+                default: 3,
+                values: ['a', 'b', 'c', 'd']
+            }];
+        },
+
         // 获得时间回调
         handleChange: function handleChange() {
             var values = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
 
+            // console.log(values,'values')
             // 当前年月日
             var nYear = new Date().getYear() + 1900;
             var nMonth = new Date().getMonth() + 1;
@@ -10849,7 +10880,7 @@ new _vue2.default({
     },
     mounted: function mounted() {}
 });
-},{"vue":8,"./VueSimplePicker.vue":6}],23:[function(require,module,exports) {
+},{"vue":8,"./VueSimplePicker.vue":6}],24:[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 
@@ -10878,7 +10909,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '59188' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '55692' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 
@@ -11019,5 +11050,5 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.parcelRequire, id);
   });
 }
-},{}]},{},[23,4], null)
+},{}]},{},[24,4], null)
 //# sourceMappingURL=/app.22f51a59.map
