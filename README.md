@@ -194,6 +194,8 @@ flex|数字number|占宽度的比例|默认：1
 }
 
 ```
+## 提示
+更好用的picker组件,及更多vue移动端组件，欢迎使用： [garen-ui](https://duyanpeng.github.io/garen/)
 
 ## 版本更新说明
 ---
